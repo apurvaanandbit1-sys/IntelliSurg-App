@@ -1,31 +1,71 @@
 # 🏥 IntelliSurg
 
-> **AI-powered Post-operative Patient Monitoring System**
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+### AI-Powered Post-operative Patient Monitoring System
 
----
+*A multi-model healthcare AI prototype integrating ANN, RNN, CNN and Fusion AI into a unified clinical dashboard.*
 
-## 📖 Overview
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge\&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge\&logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge\&logo=streamlit)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge\&logo=tensorflow)
+![GitHub](https://img.shields.io/github/stars/apurvaanandbit1-sys/IntelliSurg-App?style=for-the-badge)
 
-IntelliSurg is an AI-powered clinical decision support prototype that assists in post-operative patient monitoring by combining multiple deep learning models into a single dashboard.
-
-The application predicts:
-
-- 🧠 Readmission Risk (ANN)
-- ❤️ ECG Beat Classification (RNN)
-- 🩹 Wound Infection Detection (CNN)
-- 📊 Overall Criticality Score (Fusion Model)
-
-The project demonstrates how multiple AI models can be integrated into a unified healthcare monitoring system.
+</div>
 
 ---
 
-# Screenshots
+# 📖 Overview
+
+IntelliSurg is an AI-powered clinical decision support prototype designed to demonstrate how multiple machine learning models can work together to assist in post-operative patient monitoring.
+
+The system combines structured clinical data, ECG signals and wound images into a single dashboard capable of generating an overall patient assessment.
+
+This project was developed as an educational demonstration of applied AI in healthcare.
+
+---
+
+# ✨ Features
+
+### 🧠 ANN — Readmission Risk Prediction
+
+* Predicts post-operative readmission risk
+* Interactive probability visualization
+* Clinical feature input form
+
+---
+
+### ❤️ RNN — ECG Beat Classification
+
+* 187-point ECG signal classification
+* Interactive ECG waveform visualization
+* Beat probability distribution
+* Confidence estimation
+
+---
+
+### 🩹 CNN — Wound Infection Detection
+
+* Medical wound image classification
+* Image upload interface
+* Infection confidence prediction
+
+---
+
+### 📊 Fusion AI Dashboard
+
+Combines outputs from all models to generate
+
+* Overall patient criticality score
+* Risk badge
+* ANN summary
+* ECG summary
+* Wound assessment
+
+---
+
+# 📸 Screenshots
 
 ## ANN Readmission Prediction
 
@@ -51,46 +91,55 @@ The project demonstrates how multiple AI models can be integrated into a unified
 
 ---
 
-# Features
+# 🏗 System Architecture
 
-- Modern Streamlit dashboard
-- FastAPI backend
-- Interactive ECG waveform visualization
-- Readmission risk estimation
-- ECG beat classification
-- Wound infection classification
-- Fusion-based patient criticality scoring
-- Dark clinical UI
-
----
-
-# Tech Stack
-
-### Frontend
-
-- Streamlit
-- Plotly
-
-### Backend
-
-- FastAPI
-- Uvicorn
-
-### AI Models
-
-- Artificial Neural Network (ANN)
-- Recurrent Neural Network (RNN)
-- Convolutional Neural Network (CNN)
-
-### Languages
-
-- Python
-
----
-
-# Project Structure
-
+```text
+               Patient Data
+                     │
+     ┌───────────────┼───────────────┐
+     │               │               │
+ Clinical Data     ECG Signal     Wound Image
+     │               │               │
+     ▼               ▼               ▼
+    ANN             RNN             CNN
+     │               │               │
+     └───────────────┼───────────────┘
+                     ▼
+              Fusion AI Engine
+                     ▼
+          Clinical Dashboard (Streamlit)
 ```
+
+---
+
+# ⚙️ Tech Stack
+
+## Frontend
+
+* Streamlit
+* Plotly
+
+## Backend
+
+* FastAPI
+* Uvicorn
+
+## Machine Learning
+
+* TensorFlow / Keras
+* Artificial Neural Networks (ANN)
+* Recurrent Neural Networks (RNN)
+* Convolutional Neural Networks (CNN)
+
+## Languages
+
+* Python
+
+---
+
+# 📂 Project Structure
+
+```text
 IntelliSurg-App
 │
 ├── backend
@@ -99,20 +148,26 @@ IntelliSurg-App
 │   ├── models
 │   ├── routers
 │   ├── scalers
-│   └── schemas
+│   ├── schemas
+│   └── requirements.txt
 │
 ├── frontend
 │   ├── app.py
-│   └── theme.py
+│   ├── theme.py
+│   └── start_frontend.ps1
 │
 ├── screenshots
+│   ├── ann.png
+│   ├── rnn.png
+│   ├── cnn.png
+│   └── fusion.png
 │
 └── README.md
 ```
 
 ---
 
-# Installation
+# 🚀 Getting Started
 
 Clone the repository
 
@@ -140,40 +195,52 @@ cd frontend
 .\start_frontend.ps1
 ```
 
----
+Open
 
-# Future Improvements
-
-- Patient authentication
-- Database integration
-- Real-time ECG streaming
-- Explainable AI visualizations
-- Electronic Health Record integration
-- Cloud deployment
-- Doctor dashboard
-- PDF report generation
+```
+http://localhost:8501
+```
 
 ---
 
-# Disclaimer
+# 🎯 Future Improvements
 
-This project is intended for educational and research purposes only.
-
-It is **not** intended for clinical diagnosis or real-world medical decision making.
+* User authentication
+* Patient database integration
+* Real-time ECG streaming
+* Explainable AI visualizations
+* Electronic Health Record integration
+* PDF report generation
+* Cloud deployment
+* Docker support
+* CI/CD pipeline
 
 ---
 
-# Author
+# ⚠️ Disclaimer
 
-**Apurv Anand**
+This project was developed for educational, research and portfolio purposes.
+
+It is **not intended for clinical diagnosis or real-world medical decision-making.**
+
+---
+
+# 👨‍💻 Author
+
+### Apurv Anand
 
 B.Tech Computer Science Engineering
 
-BIT Mesra
+Birla Institute of Technology, Mesra
 
 GitHub:
+
 https://github.com/apurvaanandbit1-sys
 
 ---
 
-⭐ If you found this project interesting, consider giving it a star.
+<div align="center">
+
+### ⭐ If you found this project interesting, consider giving it a star.
+
+</div>
