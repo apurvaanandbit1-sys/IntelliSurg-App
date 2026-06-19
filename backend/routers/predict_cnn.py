@@ -1,5 +1,8 @@
 # routers/predict_cnn.py
 
+
+
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pathlib import Path
 import tempfile
@@ -58,3 +61,12 @@ async def cnn_predict(file: UploadFile = File(...)):
     finally:
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
+
+
+import time
+
+start = time.time()
+
+# existing prediction code
+
+print("CNN inference took:", time.time() - start)
