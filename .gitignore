@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+.venv311/
+
+# VS Code
+.vscode/
+
+# Python cache
+.pytest_cache/
+
+# Streamlit cache
+.streamlit/
+
+# Model cache
+*.h5
+*.ckpt
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini

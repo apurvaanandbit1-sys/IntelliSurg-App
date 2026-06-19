@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+tensorflow==2.16.1
+numpy
+pandas
+pillow
+python-multipart
+scikit-learn
+joblib
+h5py
+requests
+streamlit
