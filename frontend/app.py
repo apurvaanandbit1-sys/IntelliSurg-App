@@ -409,10 +409,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-backend_url = st.sidebar.text_input("Backend URL", value="http://127.0.0.1:8000")
+backend_url = st.sidebar.text_input(
+    "Backend URL",
+    value="https://apurv-intellisurg-api.onrender.com"
+)
 st.sidebar.markdown(
     f"""<p style="font-size:12px; color:{COLORS['text_muted']};">
-    Points at your local FastAPI server. Update this after deployment.
+    Points at the deployed FastAPI backend hosted on Render.
     </p>""",
     unsafe_allow_html=True,
 )
