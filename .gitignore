@@ -18,7 +18,6 @@ venv/
 .streamlit/
 
 # Model cache
-*.h5
 *.ckpt
 
 # Logs
