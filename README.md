@@ -112,7 +112,16 @@ Combines outputs from all models to generate
 
 ---
 
-# ⚙️ Tech Stack
+# ⚙️ Tech Stack & Engineering Practices
+
+## Engineering Practices
+
+* **Modular FastAPI Architecture:** Clean separation of concerns with distinct routers, schemas, and core ML inference logic.
+* **Robust Data Validation:** Utilizing `Pydantic` models to strictly validate API payloads and ensure safe data handling.
+* **Production-Ready Logging:** Implementing standard Python `logging` for detailed server-side error tracking and system observability.
+* **Asynchronous Handling:** Utilizing FastAPI's `async/await` for efficient file I/O handling during image uploads.
+* **Strict Type Hinting:** Enhancing maintainability and developer experience via comprehensive Python type annotations.
+* **Polished UI/UX:** Leveraging Streamlit with custom CSS to build a highly responsive, professional clinical dashboard.
 
 ## Frontend
 
@@ -123,6 +132,7 @@ Combines outputs from all models to generate
 
 * FastAPI
 * Uvicorn
+* Pydantic
 
 ## Machine Learning
 
@@ -130,10 +140,11 @@ Combines outputs from all models to generate
 * Artificial Neural Networks (ANN)
 * Recurrent Neural Networks (RNN)
 * Convolutional Neural Networks (CNN)
+* Scikit-Learn (Data Preprocessing)
 
 ## Languages
 
-* Python
+* Python (3.11+)
 
 ---
 

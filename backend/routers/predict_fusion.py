@@ -4,10 +4,12 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from pydantic import ValidationError
 
 from core.inference import predict_ann, predict_cnn, predict_fusion, predict_rnn
 from core.model_manager import model_manager
 from core.preprocessing import build_ann_feature_vector, parse_signal_payload, validate_signal_187
+from schemas.models import PatientProfileRequest
 
 router = APIRouter(
     prefix="/predict",
@@ -31,8 +33,17 @@ async def fusion_predict(
                 detail="patient_profile must be a JSON object.",
             )
 
+        try:
+            validated_profile = PatientProfileRequest(**profile_data)
+            profile_dict = validated_profile.model_dump()
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=422,
+                detail=e.errors(),
+            )
+
         feature_vector = build_ann_feature_vector(
-            profile_data,
+            profile_dict,
             model_manager.metadata["ann_features"],
         )
 

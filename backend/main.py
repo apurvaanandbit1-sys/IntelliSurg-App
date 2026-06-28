@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from routers.health import router as health_router
@@ -8,23 +9,24 @@ from routers.predict_rnn import router as rnn_router
 from routers.predict_cnn import router as cnn_router
 from routers import predict_fusion
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    print("\n===================================")
-    print("Starting IntelliSurg Backend...")
-    print("===================================\n")
+    logger.info("Starting IntelliSurg Backend...")
 
     model_manager.load_all()
 
-    print("\n===================================")
-    print("All assets loaded successfully.")
-    print("===================================\n")
+    logger.info("All assets loaded successfully.")
 
     yield
 
-    print("\nShutting down IntelliSurg Backend...\n")
+    logger.info("Shutting down IntelliSurg Backend...")
 
 
 app = FastAPI(
