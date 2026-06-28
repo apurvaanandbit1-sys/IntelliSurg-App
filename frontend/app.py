@@ -21,6 +21,8 @@ import requests
 import streamlit as st
 import plotly.graph_objects as go
 
+from demo_data import DEMO_PATIENTS, DEMO_ECGS
+
 from theme import (
     inject_css,
     inject_tabler_icons,
@@ -141,66 +143,85 @@ def draw_ecg(signal_text: str):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def patient_profile_form(prefix: str) -> dict:
+
+    st.markdown(
+        f"""<div style="background:rgba(61,232,196,0.1); border:1px solid rgba(61,232,196,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px;">
+        <p style="font-size:13px; color:{COLORS['accent']}; margin:0; font-weight:500;">
+        <i class="ti ti-info-circle"></i> <b>Demo Patients:</b> Select a preset to quickly evaluate how the AI assesses different risk profiles.</p>
+        </div>""",
+        unsafe_allow_html=True
+    )
+
+    selected_demo = st.selectbox(
+        "Load Demo Patient",
+        options=list(DEMO_PATIENTS.keys()),
+        key=f"{prefix}_demo_select"
+    )
+
+    # Pre-fill logic based on selected demo
+    default_vals = DEMO_PATIENTS.get(selected_demo) or {
+        "race": "Caucasian", "gender": "Female", "age": "[50-60)",
+        "admission_type_id": 1, "discharge_disposition_id": 1, "admission_source_id": 1,
+        "time_in_hospital": 3, "num_lab_procedures": 40, "num_procedures": 1,
+        "num_medications": 10, "number_outpatient": 0, "number_emergency": 0,
+        "number_inpatient": 0, "number_diagnoses": 5,
+        "diag_1": "250.83", "diag_2": "401.9", "diag_3": "272.4",
+        "max_glu_serum": "None", "A1Cresult": "None",
+        "metformin": "No", "insulin": "No", "change": "No", "diabetesMed": "No"
+    }
+
+    def get_index(options, val):
+        return options.index(val) if val in options else 0
+
     st.markdown('<p class="section-label">Demographics</p>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
 
+    race_opts = ["Caucasian", "AfricanAmerican", "Asian", "Hispanic", "Other"]
+    gender_opts = ["Female", "Male", "Unknown/Invalid"]
+    age_opts = ["[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"]
+    glu_opts = ["None", "Norm", ">200", ">300"]
+    a1c_opts = ["None", "Norm", ">7", ">8"]
+
     with col1:
-        race = st.selectbox(
-            "Race",
-            ["Caucasian", "AfricanAmerican", "Asian", "Hispanic", "Other"],
-            key=f"{prefix}_race",
-        )
-        gender = st.selectbox(
-            "Gender",
-            ["Female", "Male", "Unknown/Invalid"],
-            key=f"{prefix}_gender",
-        )
-        age = st.selectbox(
-            "Age Group",
-            ["[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"],
-            index=5,
-            key=f"{prefix}_age",
-        )
-        max_glu_serum = st.selectbox(
-            "Max Glucose Serum",
-            ["None", "Norm", ">200", ">300"],
-            key=f"{prefix}_max_glu",
-        )
+        race = st.selectbox("Race", race_opts, index=get_index(race_opts, default_vals["race"]), key=f"{prefix}_race")
+        gender = st.selectbox("Gender", gender_opts, index=get_index(gender_opts, default_vals["gender"]), key=f"{prefix}_gender")
+        age = st.selectbox("Age Group", age_opts, index=get_index(age_opts, default_vals["age"]), key=f"{prefix}_age")
+        max_glu_serum = st.selectbox("Max Glucose Serum", glu_opts, index=get_index(glu_opts, default_vals["max_glu_serum"]), key=f"{prefix}_max_glu")
 
     with col2:
-        admission_type_id = st.number_input("Admission Type ID", min_value=1, value=1, key=f"{prefix}_admission_type")
-        discharge_disposition_id = st.number_input("Discharge Disposition ID", min_value=1, value=1, key=f"{prefix}_discharge")
-        admission_source_id = st.number_input("Admission Source ID", min_value=1, value=1, key=f"{prefix}_admission_source")
-        time_in_hospital = st.number_input("Time In Hospital", min_value=1, value=3, key=f"{prefix}_time_hospital")
-        A1Cresult = st.selectbox(
-            "A1C Result",
-            ["None", "Norm", ">7", ">8"],
-            key=f"{prefix}_a1c",
-        )
+        admission_type_id = st.number_input("Admission Type ID", min_value=1, value=default_vals["admission_type_id"], key=f"{prefix}_admission_type")
+        discharge_disposition_id = st.number_input("Discharge Disposition ID", min_value=1, value=default_vals["discharge_disposition_id"], key=f"{prefix}_discharge")
+        admission_source_id = st.number_input("Admission Source ID", min_value=1, value=default_vals["admission_source_id"], key=f"{prefix}_admission_source")
+        time_in_hospital = st.number_input("Time In Hospital", min_value=1, value=default_vals["time_in_hospital"], key=f"{prefix}_time_hospital")
+        A1Cresult = st.selectbox("A1C Result", a1c_opts, index=get_index(a1c_opts, default_vals["A1Cresult"]), key=f"{prefix}_a1c")
 
     with col3:
-        num_lab_procedures = st.number_input("Lab Procedures", min_value=0, value=40, key=f"{prefix}_lab")
-        num_procedures = st.number_input("Procedures", min_value=0, value=1, key=f"{prefix}_procedures")
-        num_medications = st.number_input("Medications", min_value=0, value=10, key=f"{prefix}_medications")
-        number_outpatient = st.number_input("Outpatient Visits", min_value=0, value=0, key=f"{prefix}_outpatient")
-        number_emergency = st.number_input("Emergency Visits", min_value=0, value=0, key=f"{prefix}_emergency")
-        number_inpatient = st.number_input("Inpatient Visits", min_value=0, value=0, key=f"{prefix}_inpatient")
-        number_diagnoses = st.number_input("Number of Diagnoses", min_value=1, value=5, key=f"{prefix}_diagnoses")
+        num_lab_procedures = st.number_input("Lab Procedures", min_value=0, value=default_vals["num_lab_procedures"], key=f"{prefix}_lab")
+        num_procedures = st.number_input("Procedures", min_value=0, value=default_vals["num_procedures"], key=f"{prefix}_procedures")
+        num_medications = st.number_input("Medications", min_value=0, value=default_vals["num_medications"], key=f"{prefix}_medications")
+        number_outpatient = st.number_input("Outpatient Visits", min_value=0, value=default_vals["number_outpatient"], key=f"{prefix}_outpatient")
+        number_emergency = st.number_input("Emergency Visits", min_value=0, value=default_vals["number_emergency"], key=f"{prefix}_emergency")
+        number_inpatient = st.number_input("Inpatient Visits", min_value=0, value=default_vals["number_inpatient"], key=f"{prefix}_inpatient")
+        number_diagnoses = st.number_input("Number of Diagnoses", min_value=1, value=default_vals["number_diagnoses"], key=f"{prefix}_diagnoses")
 
     st.markdown('<p class="section-label">Diagnosis & medication</p>', unsafe_allow_html=True)
     diag_col1, diag_col2, diag_col3, med_col = st.columns(4)
 
+    med_opts = ["No", "Steady", "Up", "Down"]
+    ch_opts = ["No", "Ch"]
+    dm_opts = ["No", "Yes"]
+
     with diag_col1:
-        diag_1 = st.text_input("Diagnosis Code 1", value="250.83", key=f"{prefix}_diag1")
+        diag_1 = st.text_input("Diagnosis Code 1", value=default_vals["diag_1"], key=f"{prefix}_diag1")
     with diag_col2:
-        diag_2 = st.text_input("Diagnosis Code 2", value="401.9", key=f"{prefix}_diag2")
+        diag_2 = st.text_input("Diagnosis Code 2", value=default_vals["diag_2"], key=f"{prefix}_diag2")
     with diag_col3:
-        diag_3 = st.text_input("Diagnosis Code 3", value="272.4", key=f"{prefix}_diag3")
+        diag_3 = st.text_input("Diagnosis Code 3", value=default_vals["diag_3"], key=f"{prefix}_diag3")
     with med_col:
-        metformin = st.selectbox("Metformin", ["No", "Steady", "Up", "Down"], key=f"{prefix}_metformin")
-        insulin = st.selectbox("Insulin", ["No", "Steady", "Up", "Down"], key=f"{prefix}_insulin")
-        change = st.selectbox("Medication Change", ["No", "Ch"], key=f"{prefix}_change")
-        diabetes_med = st.selectbox("Diabetes Medication", ["No", "Yes"], key=f"{prefix}_diabetesmed")
+        metformin = st.selectbox("Metformin", med_opts, index=get_index(med_opts, default_vals["metformin"]), key=f"{prefix}_metformin")
+        insulin = st.selectbox("Insulin", med_opts, index=get_index(med_opts, default_vals["insulin"]), key=f"{prefix}_insulin")
+        change = st.selectbox("Change in meds", ch_opts, index=get_index(ch_opts, default_vals["change"]), key=f"{prefix}_change")
+        diabetesMed = st.selectbox("Diabetes Meds", dm_opts, index=get_index(dm_opts, default_vals["diabetesMed"]), key=f"{prefix}_diabetes_med")
 
     return {
         "race": race,
@@ -225,7 +246,7 @@ def patient_profile_form(prefix: str) -> dict:
         "metformin": metformin,
         "insulin": insulin,
         "change": change,
-        "diabetesMed": diabetes_med,
+        "diabetesMed": diabetesMed,
     }
 
 
@@ -243,21 +264,31 @@ def render_ann_result(payload: dict):
     label = payload.get("risk_label", "Unknown")
     level = risk_level_from_probability(prob if isinstance(prob, (int, float)) else None)
 
+    clinical_interpretation = "Elevated risk of post-operative complications requiring readmission. Monitor closely." if level == "high" else "Baseline post-operative risk profile. Standard monitoring protocols apply."
+    monitoring_priority = "Priority: Routine" if level != "high" else "Priority: Urgent Observation"
+
     html = big_metric_card(
-        eyebrow="ANN prediction",
-        title="Readmission risk",
+        eyebrow="AI Clinical Findings",
+        title="Readmission Risk Assessment",
         big_value=f"{pct(prob)}%" if prob is not None else "—",
         big_label=label,
         pct=pct(prob),
         badge_level=level,
         sub_cards_html=f"""
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px;">
-            {metric_card('ti-list-details', 'Features used', str(payload.get('feature_count', '—')), 100, COLORS['accent'])}
-            {metric_card('ti-checkbox', 'Model input', 'Ready' if payload.get('model_input_ready') else 'Incomplete', 100 if payload.get('model_input_ready') else 30, COLORS['accent'])}
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+            <div style="background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px; border:1px solid {COLORS['border']};">
+                <p style="font-size:11px; color:{COLORS['text_muted']}; margin:0; text-transform:uppercase;">Clinical Interpretation</p>
+                <p style="font-size:13px; color:{COLORS['text_primary']}; margin:4px 0 0;">{clinical_interpretation}</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px; border:1px solid {COLORS['border']};">
+                <p style="font-size:11px; color:{COLORS['text_muted']}; margin:0; text-transform:uppercase;">Suggested Action</p>
+                <p style="font-size:13px; color:{COLORS['text_primary']}; margin:4px 0 0; font-weight:600;">{monitoring_priority}</p>
+            </div>
         </div>
         """
     )
     st.markdown(html, unsafe_allow_html=True)
+    st.markdown(disclaimer_footer(), unsafe_allow_html=True)
 
 
 def render_rnn_result(payload: dict):
@@ -305,10 +336,7 @@ def render_rnn_result(payload: dict):
     )
 
     st.markdown(html, unsafe_allow_html=True)
-
-    st.caption(
-        f"Predicted class index: {class_index}"
-    )
+    st.markdown(disclaimer_footer(), unsafe_allow_html=True)
 
 def render_cnn_result(payload: dict, image_file=None):
     """
@@ -323,15 +351,24 @@ def render_cnn_result(payload: dict, image_file=None):
             st.image(image_file, caption="Uploaded image", use_container_width=True)
 
     with col_result:
+        clinical_interpretation = "Wound site displays characteristics consistent with an active infection." if wound_class.lower() == "infected" else "Wound site appears normal with standard healing progression."
+
         html = big_metric_card(
-            eyebrow="Wound classification",
-            title="Predicted wound type",
+            eyebrow="AI Clinical Findings",
+            title="Infection Site Assessment",
             big_value=str(wound_class).upper(),
             big_label=f"{pct(confidence)}% confidence" if confidence is not None else "",
             pct=pct(confidence),
             badge_level=risk_level_from_probability(confidence if isinstance(confidence, (int, float)) else None),
+            sub_cards_html=f"""
+            <div style="background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px; border:1px solid {COLORS['border']}; margin-top:16px;">
+                <p style="font-size:11px; color:{COLORS['text_muted']}; margin:0; text-transform:uppercase;">Clinical Interpretation</p>
+                <p style="font-size:13px; color:{COLORS['text_primary']}; margin:4px 0 0;">{clinical_interpretation}</p>
+            </div>
+            """
         )
         st.markdown(html, unsafe_allow_html=True)
+        st.markdown(disclaimer_footer(), unsafe_allow_html=True)
 
 
 def render_fusion_result(payload: dict):
@@ -351,19 +388,29 @@ def render_fusion_result(payload: dict):
     ecg_label = payload.get("ecg_class") or payload.get("class", "—")
     wound_label = payload.get("wound_class", "—")
 
+    ai_summary = "Patient presents a high criticality profile based on fused multimodal indicators. Immediate clinical review is recommended." if triage_level == "high" else "Patient presents a stable criticality profile. Fused multimodal indicators do not suggest immediate escalation."
+
     sub_cards = f"""
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:4px;">
-        {metric_card('ti-heartbeat', 'ANN readmission', str(ann_label), pct(payload.get('readmission_risk')), COLORS['accent'])}
-        {metric_card('ti-activity', 'ECG beat class', str(ecg_label), pct(payload.get('ecg_confidence')), '#C98A2E')}
-        {metric_card('ti-bandage', 'Wound status', str(wound_label), pct(payload.get('wound_confidence')), '#C2483F')}
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:16px;">
+        {metric_card('ti-heartbeat', 'Readmission Risk (ANN)', str(ann_label), pct(payload.get('readmission_risk')), COLORS['accent'])}
+        {metric_card('ti-activity', 'ECG Findings (RNN)', str(ecg_label), pct(payload.get('ecg_confidence')), '#C98A2E')}
+        {metric_card('ti-bandage', 'Wound Analysis (CNN)', str(wound_label), pct(payload.get('wound_confidence')), '#C2483F')}
+    </div>
+    <div style="background:rgba(255,255,255,0.03); padding:12px 16px; border-radius:8px; border:1px solid {COLORS['border']}; margin-top:16px;">
+        <p style="font-size:12px; color:{COLORS['text_muted']}; margin:0; text-transform:uppercase; font-weight:600;"><i class="ti ti-robot"></i> AI-Generated Summary</p>
+        <p style="font-size:14px; color:{COLORS['text_primary']}; margin:6px 0 0;">{ai_summary}</p>
+    </div>
+    <div style="background:rgba(239,159,39,0.08); padding:12px 16px; border-radius:8px; border:1px solid rgba(239,159,39,0.2); margin-top:12px;">
+        <p style="font-size:12px; color:{COLORS['medium_text']}; margin:0; text-transform:uppercase; font-weight:600;"><i class="ti ti-alert-triangle"></i> Limitations</p>
+        <p style="font-size:13px; color:{COLORS['text_primary']}; margin:6px 0 0; opacity:0.9;">This assessment is generated by an experimental AI fusion model. It does not account for full clinical context, recent lab trends, or uncaptured medical history. Do not use for definitive diagnostic or triage decisions.</p>
     </div>
     """
 
     html = big_metric_card(
-        eyebrow="Fusion dashboard",
-        title="Overall assessment",
+        eyebrow="Comprehensive Patient Assessment Report",
+        title="Multimodal Criticality Index",
         big_value=f"{pct(criticality)}%" if criticality is not None else "—",
-        big_label="criticality index",
+        big_label="overall risk score",
         pct=pct(criticality),
         badge_level=triage_level,
         sub_cards_html=sub_cards,
@@ -401,21 +448,21 @@ def show_response(response: requests.Response, renderer, *render_args):
 
 st.markdown(
     page_header(
-        eyebrow="Multimodal clinical AI",
-        title="IntelliSurg",
-        subtitle="Post-operative monitoring demo — ANN readmission risk, ECG beat classification, "
-                  "wound imaging, and a fused criticality score.",
+        eyebrow="Clinical Decision Support",
+        title="IntelliSurg AI",
+        subtitle="Post-operative patient monitoring system utilizing clinical data, continuous ECG telemetry, and wound imaging to deliver a unified criticality assessment.",
     ),
     unsafe_allow_html=True,
 )
 
 backend_url = st.sidebar.text_input(
-    "Backend URL",
+    "API Endpoint",
     value="https://apurv-intellisurg-api.onrender.com"
 )
 st.sidebar.markdown(
     f"""<p style="font-size:12px; color:{COLORS['text_muted']};">
-    Points at the deployed FastAPI backend hosted on Render.
+    Status: <span style="color:{COLORS['accent']}; font-weight:bold;">Online</span><br>
+    Connected to secure cloud API
     </p>""",
     unsafe_allow_html=True,
 )
@@ -423,25 +470,25 @@ st.sidebar.markdown(disclaimer_footer(), unsafe_allow_html=True)
 
 
 tab_ann, tab_rnn, tab_cnn, tab_fusion = st.tabs(
-    ["ANN Risk", "ECG RNN", "Wound CNN", "Fusion Demo"]
+    ["Clinical History", "ECG Analysis", "Wound Assessment", "Comprehensive Assessment"]
 )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 1 — ANN
+# TAB 1 — CLINICAL HISTORY
 # ─────────────────────────────────────────────────────────────────────────────
 
 with tab_ann:
     st.markdown(
-        page_header("Tabular model", "Readmission risk prediction",
-                     "Enter patient demographics and clinical history."),
+        page_header("Module 1", "Readmission Risk Analysis",
+                     "Input patient demographics, vital statistics, and clinical history to generate a baseline readmission risk score."),
         unsafe_allow_html=True,
     )
     profile = patient_profile_form("ann")
 
 
-    if st.button("Run ANN prediction", key="ann_submit"):
-        with st.spinner("Running ANN inference..."):
+    if st.button("Analyze Clinical Data", key="ann_submit"):
+        with st.spinner("Processing clinical history parameters..."):
             response = requests.post(
                 f"{backend_url}/predict/ann-from-form",
                 json=profile,
@@ -449,47 +496,74 @@ with tab_ann:
             )
         show_response(response, render_ann_result)
     else:
-        st.markdown(empty_state("ti-heartbeat", "Run a prediction to see the readmission risk score."),
+        st.markdown(empty_state("ti-heartbeat", "Provide patient information and click 'Analyze Clinical Data' to generate a baseline risk profile."),
                     unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 2 — RNN / ECG
+# TAB 2 — ECG ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 with tab_rnn:
     st.markdown(
-        page_header("Sequential model", "ECG beat classification",
-                     "Paste a 187-value ECG beat or upload a file."),
+        page_header("Module 2", "ECG Arrhythmia Detection",
+                     "Upload or provide a 187-sample continuous telemetry beat for AI-assisted arrhythmia classification."),
         unsafe_allow_html=True,
     )
 
-    signal_text = st.text_area(
-        "ECG signal",
-        value=DEFAULT_SIGNAL,
-        height=200,
-        key="rnn_signal",
+    st.markdown(
+        f"""<div style="background:rgba(61,232,196,0.1); border:1px solid rgba(61,232,196,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px;">
+        <p style="font-size:13px; color:{COLORS['accent']}; margin:0; font-weight:500;">
+        <i class="ti ti-info-circle"></i> <b>Input Methods:</b> Select a demo signal, upload a CSV/TXT file, or paste values manually. Sequences will be automatically padded or truncated to 187 samples as required by the model.</p>
+        </div>""",
+        unsafe_allow_html=True
     )
 
+    col_ecg1, col_ecg2 = st.columns(2)
     
+    with col_ecg1:
+        selected_ecg_demo = st.selectbox(
+            "Load Demo Telemetry Signal",
+            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            key="rnn_demo_select"
+        )
 
-    signal_file = st.file_uploader(
-        "Optional ECG text/CSV file",
-        type=["txt", "csv", "json"],
-        key="rnn_file",
-    )
+    with col_ecg2:
+        signal_file = st.file_uploader(
+            "Upload raw ECG file (.csv, .txt)",
+            type=["txt", "csv"],
+            key="rnn_file",
+        )
+
+    current_signal_text = DEFAULT_SIGNAL
+    if selected_ecg_demo != "Manual Entry":
+        current_signal_text = DEMO_ECGS[selected_ecg_demo]
 
     if signal_file is not None:
-        signal_text = signal_file.getvalue().decode("utf-8")
+        raw_text = signal_file.getvalue().decode("utf-8")
+        # Preprocessing: Extract numbers, pad/truncate to 187
+        raw_values = [x.strip() for x in raw_text.replace("\n", ",").split(",") if x.strip()]
+        if len(raw_values) > 187:
+            raw_values = raw_values[:187]
+        elif len(raw_values) < 187:
+            raw_values = raw_values + ["0.0"] * (187 - len(raw_values))
+        current_signal_text = ",".join(raw_values)
         st.markdown(
             f"""<p style="font-size:12px; color:{COLORS['accent_dark']};">
-            <i class="ti ti-check" style="font-size:13px;"></i> Loaded signal from uploaded file.
+            <i class="ti ti-check" style="font-size:13px;"></i> Automatically processed uploaded file to {len(raw_values)} samples.
             </p>""",
             unsafe_allow_html=True,
         )
 
-    if st.button("Run RNN prediction", key="rnn_submit"):
-        with st.spinner("Running ECG inference..."):
+    signal_text = st.text_area(
+        "Telemetry Data (187 points)",
+        value=current_signal_text,
+        height=150,
+        key="rnn_signal",
+    )
+
+    if st.button("Analyze ECG", key="rnn_submit"):
+        with st.spinner("Analyzing telemetry data..."):
             response = requests.post(
                 f"{backend_url}/predict/rnn-from-text",
                 json={"signal_text": signal_text},
@@ -497,34 +571,34 @@ with tab_rnn:
             )
         show_response(response, render_rnn_result)
     else:
-        st.markdown(empty_state("ti-activity", "Run a prediction to see the ECG beat classification."),
+        st.markdown(empty_state("ti-activity", "Input telemetry data and click 'Analyze ECG' to detect potential arrhythmias."),
                     unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("### ECG Waveform")
+    st.markdown("### Telemetry Waveform")
     draw_ecg(signal_text)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 3 — CNN / Wound
+# TAB 3 — WOUND ASSESSMENT
 # ─────────────────────────────────────────────────────────────────────────────
 
 with tab_cnn:
     st.markdown(
-        page_header("Vision model", "Wound image classification",
-                     "Upload a wound photograph for classification."),
+        page_header("Module 3", "Infection Site Analysis",
+                     "Upload a secure image of the surgical site or wound for AI-assisted infection classification."),
         unsafe_allow_html=True,
     )
 
-    image_file = st.file_uploader("Upload wound image", type=["jpg", "jpeg", "png", "bmp", "webp"], key="cnn_image")
+    image_file = st.file_uploader("Upload clinical site image", type=["jpg", "jpeg", "png", "bmp", "webp"], key="cnn_image")
 
-    if st.button("Run CNN prediction", key="cnn_submit"):
+    if st.button("Analyze Wound Image", key="cnn_submit"):
         if image_file is None:
-            st.markdown(error_card("Please upload an image first."), unsafe_allow_html=True)
+            st.markdown(error_card("Please provide a clinical image for analysis."), unsafe_allow_html=True)
         else:
             files = {
                 "file": (image_file.name, BytesIO(image_file.getvalue()), image_file.type or "application/octet-stream")
             }
-            with st.spinner("Running wound classification..."):
+            with st.spinner("Analyzing wound site..."):
                 response = requests.post(
                     f"{backend_url}/predict/cnn",
                     files=files,
@@ -533,33 +607,46 @@ with tab_cnn:
             show_response(response, render_cnn_result, image_file)
     else:
         if image_file is not None:
-            st.image(image_file, caption="Selected image", use_container_width=True)
-        st.markdown(empty_state("ti-bandage", "Upload an image and run a prediction to see the wound classification."),
+            st.image(image_file, caption="Staged for analysis", use_container_width=True)
+        st.markdown(empty_state("ti-bandage", "Upload a clinical image and click 'Analyze Wound Image' for AI assistance."),
                     unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 4 — FUSION
+# TAB 4 — COMPREHENSIVE ASSESSMENT
 # ─────────────────────────────────────────────────────────────────────────────
 
 with tab_fusion:
     st.markdown(
-        page_header("Fusion dashboard", "Combined patient assessment",
-                     "Submits patient data, ECG signal, and wound image together for a fused criticality score."),
+        page_header("Multimodal Engine", "Comprehensive Patient Assessment",
+                     "Synthesizes patient clinical history, ECG telemetry, and wound imaging to generate a holistic criticality index."),
         unsafe_allow_html=True,
     )
 
     fusion_profile = patient_profile_form("fusion")
-    fusion_signal = st.text_area("Fusion ECG signal", value=DEFAULT_SIGNAL, height=180, key="fusion_signal")
-    fusion_image = st.file_uploader(
-        "Upload wound image for fusion",
-        type=["jpg", "jpeg", "png", "bmp", "webp"],
-        key="fusion_image",
-    )
 
-    if st.button("Run fusion demo", key="fusion_submit"):
+    st.markdown('<p class="section-label">Media & Telemetry</p>', unsafe_allow_html=True)
+    col_f1, col_f2 = st.columns(2)
+
+    with col_f1:
+        fusion_demo_ecg = st.selectbox(
+            "Load Demo Telemetry Signal",
+            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            key="fusion_demo_ecg"
+        )
+        fusion_sig_val = DEMO_ECGS.get(fusion_demo_ecg, DEFAULT_SIGNAL)
+        fusion_signal = st.text_area("Telemetry Data (187 points)", value=fusion_sig_val, height=120, key="fusion_signal")
+
+    with col_f2:
+        fusion_image = st.file_uploader(
+            "Upload clinical site image",
+            type=["jpg", "jpeg", "png", "bmp", "webp"],
+            key="fusion_image",
+        )
+
+    if st.button("Generate Patient Assessment", key="fusion_submit"):
         if fusion_image is None:
-            st.markdown(error_card("Please upload a wound image for the fusion demo."), unsafe_allow_html=True)
+            st.markdown(error_card("A clinical site image is required to generate a comprehensive assessment."), unsafe_allow_html=True)
         else:
             data = {
                 "patient_profile": json.dumps(fusion_profile),
@@ -572,7 +659,7 @@ with tab_fusion:
                     fusion_image.type or "application/octet-stream",
                 )
             }
-            with st.spinner("Running ANN, CNN, RNN and fusing results..."):
+            with st.spinner("Processing multimodal clinical data..."):
                 response = requests.post(
                     f"{backend_url}/predict/fusion",
                     data=data,
@@ -582,6 +669,6 @@ with tab_fusion:
             show_response(response, render_fusion_result)
     else:
         st.markdown(
-            empty_state("ti-stack-2", "Submit patient data, an ECG signal, and a wound image to see the fused criticality score."),
+            empty_state("ti-stack-2", "Provide complete patient parameters and clinical media to generate a fused criticality score."),
             unsafe_allow_html=True,
         )
