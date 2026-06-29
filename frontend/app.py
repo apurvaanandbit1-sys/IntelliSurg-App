@@ -690,9 +690,13 @@ with tab_fusion:
         if fusion_image is None:
             st.markdown(error_card("A clinical site image is required to generate a comprehensive assessment."), unsafe_allow_html=True)
         else:
+            # Reconstruct the 187-value float string correctly for the backend
+            cleaned_signal_list = [x.strip() for x in fusion_signal.replace("\n", ",").split(",") if x.strip()]
+            cleaned_signal_string = ",".join(cleaned_signal_list)
+
             data = {
                 "patient_profile": json.dumps(fusion_profile),
-                "signal": fusion_signal,
+                "signal": cleaned_signal_string,
             }
             files = {
                 "file": (
