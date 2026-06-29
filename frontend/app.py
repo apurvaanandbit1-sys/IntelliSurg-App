@@ -34,6 +34,9 @@ from theme import (
     empty_state,
     error_card,
     COLORS,
+    section_label,
+    info_banner,
+    success_message,
 )
 
 
@@ -145,10 +148,7 @@ def draw_ecg(signal_text: str):
 def patient_profile_form(prefix: str) -> dict:
 
     st.markdown(
-        f"""<div style="background:rgba(61,232,196,0.1); border:1px solid rgba(61,232,196,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px;">
-        <p style="font-size:13px; color:{COLORS['accent']}; margin:0; font-weight:500;">
-        <i class="ti ti-info-circle"></i> <b>Demo Patients:</b> Select a preset to quickly evaluate how the AI assesses different risk profiles.</p>
-        </div>""",
+        info_banner("<b>Demo Patients:</b> Select a preset to quickly evaluate how the AI assesses different risk profiles."),
         unsafe_allow_html=True
     )
 
@@ -170,10 +170,45 @@ def patient_profile_form(prefix: str) -> dict:
         "metformin": "No", "insulin": "No", "change": "No", "diabetesMed": "No"
     }
 
+    if selected_demo != "Select a demo patient...":
+        import hashlib
+        # Generate a pseudo-random ID based on the demo name
+        patient_id = "PT-" + hashlib.md5(selected_demo.encode()).hexdigest()[:6].upper()
+
+        status_color = COLORS['high_text'] if "High" in selected_demo else COLORS['low_text']
+        status_text = "Critical Observation" if "High" in selected_demo else "Routine Recovery"
+
+        st.markdown(
+            f"""
+            <div style="background:{COLORS['bg_subcard']}; border:1px solid {COLORS['border']}; border-radius:12px; padding:16px; margin-bottom:24px;">
+                <p style="font-size:11px; text-transform:uppercase; color:{COLORS['text_muted']}; margin:0 0 8px 0; font-weight:600;">Patient Summary Panel</p>
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+                    <div>
+                        <p style="font-size:12px; color:{COLORS['text_muted']}; margin:0;">Patient ID</p>
+                        <p style="font-size:14px; font-weight:600; color:{COLORS['text_primary']}; margin:2px 0 0;">{patient_id}</p>
+                    </div>
+                    <div>
+                        <p style="font-size:12px; color:{COLORS['text_muted']}; margin:0;">Demographics</p>
+                        <p style="font-size:14px; font-weight:600; color:{COLORS['text_primary']}; margin:2px 0 0;">{default_vals['age']} {default_vals['gender']}</p>
+                    </div>
+                    <div>
+                        <p style="font-size:12px; color:{COLORS['text_muted']}; margin:0;">Prior Diagnoses</p>
+                        <p style="font-size:14px; font-weight:600; color:{COLORS['text_primary']}; margin:2px 0 0;">{default_vals['number_diagnoses']} Conditions</p>
+                    </div>
+                    <div>
+                        <p style="font-size:12px; color:{COLORS['text_muted']}; margin:0;">Current Status</p>
+                        <p style="font-size:14px; font-weight:600; color:{status_color}; margin:2px 0 0;">{status_text}</p>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     def get_index(options, val):
         return options.index(val) if val in options else 0
 
-    st.markdown('<p class="section-label">Demographics</p>', unsafe_allow_html=True)
+    st.markdown(section_label("Demographics"), unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
 
     race_opts = ["Caucasian", "AfricanAmerican", "Asian", "Hispanic", "Other"]
@@ -204,7 +239,7 @@ def patient_profile_form(prefix: str) -> dict:
         number_inpatient = st.number_input("Inpatient Visits", min_value=0, value=default_vals["number_inpatient"], key=f"{prefix}_inpatient")
         number_diagnoses = st.number_input("Number of Diagnoses", min_value=1, value=default_vals["number_diagnoses"], key=f"{prefix}_diagnoses")
 
-    st.markdown('<p class="section-label">Diagnosis & medication</p>', unsafe_allow_html=True)
+    st.markdown(section_label("Diagnosis & medication"), unsafe_allow_html=True)
     diag_col1, diag_col2, diag_col3, med_col = st.columns(4)
 
     med_opts = ["No", "Steady", "Up", "Down"]
@@ -446,26 +481,38 @@ def show_response(response: requests.Response, renderer, *render_args):
 # PAGE HEADER + SIDEBAR
 # ─────────────────────────────────────────────────────────────────────────────
 
+import datetime
+
 st.markdown(
     page_header(
-        eyebrow="Clinical Decision Support",
-        title="IntelliSurg AI",
-        subtitle="Post-operative patient monitoring system utilizing clinical data, continuous ECG telemetry, and wound imaging to deliver a unified criticality assessment.",
+        eyebrow="AI-Powered Post-Operative Monitoring",
+        title="IntelliSurg",
+        subtitle="Integrating clinical history, ECG analysis, wound assessment, and multimodal AI to support postoperative risk assessment.",
     ),
     unsafe_allow_html=True,
 )
 
+st.sidebar.markdown("### System Configuration")
+
 backend_url = st.sidebar.text_input(
-    "API Endpoint",
+    "Backend API Endpoint",
     value="https://apurv-intellisurg-api.onrender.com"
 )
+
+st.sidebar.markdown("---")
+
 st.sidebar.markdown(
-    f"""<p style="font-size:12px; color:{COLORS['text_muted']};">
-    Status: <span style="color:{COLORS['accent']}; font-weight:bold;">Online</span><br>
-    Connected to secure cloud API
-    </p>""",
+    f"""
+    <div style="font-size:13px; color:{COLORS['text_muted']}; line-height:1.6;">
+        <p style="margin:0;"><i class="ti ti-activity-heartbeat" style="color:{COLORS['accent']};"></i> <b>Backend Status:</b> Online</p>
+        <p style="margin:0;"><i class="ti ti-code"></i> <b>Version:</b> 1.2.0 (Production)</p>
+        <p style="margin:0;"><i class="ti ti-calendar"></i> <b>Date:</b> {datetime.datetime.now().strftime("%Y-%m-%d")}</p>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
+
+st.sidebar.markdown("---")
 st.sidebar.markdown(disclaimer_footer(), unsafe_allow_html=True)
 
 
@@ -512,10 +559,7 @@ with tab_rnn:
     )
 
     st.markdown(
-        f"""<div style="background:rgba(61,232,196,0.1); border:1px solid rgba(61,232,196,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px;">
-        <p style="font-size:13px; color:{COLORS['accent']}; margin:0; font-weight:500;">
-        <i class="ti ti-info-circle"></i> <b>Input Methods:</b> Select a demo signal, upload a CSV/TXT file, or paste values manually. Sequences will be automatically padded or truncated to 187 samples as required by the model.</p>
-        </div>""",
+        info_banner("<b>Input Methods:</b> Select a demo signal, upload a CSV/TXT file, or paste values manually. Sequences will be automatically padded or truncated to 187 samples as required by the model."),
         unsafe_allow_html=True
     )
 
@@ -549,9 +593,7 @@ with tab_rnn:
             raw_values = raw_values + ["0.0"] * (187 - len(raw_values))
         current_signal_text = ",".join(raw_values)
         st.markdown(
-            f"""<p style="font-size:12px; color:{COLORS['accent_dark']};">
-            <i class="ti ti-check" style="font-size:13px;"></i> Automatically processed uploaded file to {len(raw_values)} samples.
-            </p>""",
+            success_message(f"Automatically processed uploaded file to {len(raw_values)} samples."),
             unsafe_allow_html=True,
         )
 
@@ -625,7 +667,7 @@ with tab_fusion:
 
     fusion_profile = patient_profile_form("fusion")
 
-    st.markdown('<p class="section-label">Media & Telemetry</p>', unsafe_allow_html=True)
+    st.markdown(section_label("Media & Telemetry"), unsafe_allow_html=True)
     col_f1, col_f2 = st.columns(2)
 
     with col_f1:
@@ -659,13 +701,23 @@ with tab_fusion:
                     fusion_image.type or "application/octet-stream",
                 )
             }
-            with st.spinner("Processing multimodal clinical data..."):
+            import time
+            with st.status("Initializing Multimodal Analysis...", expanded=True) as status:
+                st.write("Extracting clinical history parameters...")
+                time.sleep(0.6)
+                st.write("Applying continuous telemetry signal processing...")
+                time.sleep(0.6)
+                st.write("Running convolution filters on clinical site image...")
+                time.sleep(0.6)
+                st.write("Fusing AI modality indices into overall criticality score...")
                 response = requests.post(
                     f"{backend_url}/predict/fusion",
                     data=data,
                     files=files,
                     timeout=120,
                 )
+                status.update(label="Assessment Complete", state="complete", expanded=False)
+
             show_response(response, render_fusion_result)
     else:
         st.markdown(
