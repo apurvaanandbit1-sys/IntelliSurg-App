@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from typing import List, Dict, Any, Union
 
 from core.model_manager import model_manager
 
@@ -8,7 +9,7 @@ from core.model_manager import model_manager
 # ANN
 # ==================================================
 
-def predict_ann(features_array):
+def predict_ann(features_array: List[float]) -> float:
 
     scaler = model_manager.scalers["ann"]
     model = model_manager.models["ann"]
@@ -24,7 +25,7 @@ def predict_ann(features_array):
 # CNN
 # ==================================================
 
-def predict_cnn(image_path):
+def predict_cnn(image_path: str) -> Dict[str, Union[str, float, List[float]]]:
 
     model = model_manager.models["cnn"]
 
@@ -55,7 +56,7 @@ def predict_cnn(image_path):
 # RNN
 # ==================================================
 
-def predict_rnn(signal_187):
+def predict_rnn(signal_187: List[float]) -> Dict[str, Union[int, str, float, List[float]]]:
 
     scaler = model_manager.scalers["rnn"]
     model = model_manager.models["rnn"]
@@ -93,10 +94,10 @@ def predict_rnn(signal_187):
 # ==================================================
 
 def predict_fusion(
-    ann_score,
-    cnn_score,
-    rnn_score
-):
+    ann_score: float,
+    cnn_score: float,
+    rnn_score: float
+) -> float:
 
     fusion_model = model_manager.models["fusion"]
 

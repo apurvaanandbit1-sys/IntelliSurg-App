@@ -2,17 +2,23 @@ from pathlib import Path
 import tensorflow as tf
 import joblib
 import json
+import logging
+from typing import Dict, Any
+
+logger = logging.getLogger(__name__)
 
 
 class ModelManager:
-    def __init__(self):
-        self.models = {}
-        self.scalers = {}
-        self.metadata = {}
+    def __init__(self) -> None:
+        self.models: Dict[str, Any] = {}
+        self.scalers: Dict[str, Any] = {}
+        self.metadata: Dict[str, Any] = {}
 
-    def load_all(self):
+    def load_all(self) -> None:
 
         base_dir = Path(__file__).resolve().parent.parent
+
+        logger.info("Loading models, scalers, and metadata...")
 
         # ======================
         # MODELS
@@ -66,7 +72,9 @@ class ModelManager:
         ) as f:
             self.metadata["cnn_classes"] = json.load(f)
 
-    def status(self):
+        logger.info("Successfully loaded all assets.")
+
+    def status(self) -> Dict[str, bool]:
         return {
             "ann_loaded": "ann" in self.models,
             "cnn_loaded": "cnn" in self.models,

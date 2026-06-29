@@ -41,21 +41,3 @@ class PatientProfileRequest(BaseModel):
     diabetesMed: str = "No"
 
 
-class PredictionResponse(BaseModel):
-    prediction: str
-    confidence: float
-
-
-class FusionRequest(BaseModel):
-    features: List[float]
-    signal: List[float]
-
-
-class FusionDemoRequest(BaseModel):
-    patient_profile: PatientProfileRequest
-    signal: List[float]
-    notes: str | None = None
-
-
-class MetadataResponse(BaseModel):
-    data: dict[str, Any]

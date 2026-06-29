@@ -3,14 +3,17 @@
 
 
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+import logging
+from pathlib import Path
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from core.inference import predict_cnn
 from core.model_manager import model_manager
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/predict",
@@ -53,20 +56,12 @@ async def cnn_predict(file: UploadFile = File(...)):
         raise
 
     except Exception as e:
+        logger.error(f"CNN prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="An internal error occurred during CNN prediction."
         )
 
     finally:
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
-
-
-import time
-
-start = time.time()
-
-# existing prediction code
-
-print("CNN inference took:", time.time() - start)

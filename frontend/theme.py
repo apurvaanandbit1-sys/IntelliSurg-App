@@ -35,6 +35,9 @@ COLORS = {
     "high_bg"      : "rgba(226,75,74,0.12)",
     "high_text"    : "#F09595",
     "high_glow"    : "rgba(226,75,74,0.5)",
+    "info_bg"      : "rgba(56,162,255,0.12)",
+    "info_text"    : "#38A2FF",
+    "info_glow"    : "rgba(56,162,255,0.5)",
 }
 
 
@@ -183,6 +186,27 @@ def inject_css():
         unsafe_allow_html=True,
     )
 
+def section_label(text: str) -> str:
+    """Returns an HTML string for a section label."""
+    return f'<p class="section-label">{text}</p>'
+
+def info_banner(text: str) -> str:
+    """Returns an HTML string for a dismissible info banner."""
+    return f"""
+    <div style="background:rgba(61,232,196,0.1); border:1px solid rgba(61,232,196,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px;">
+        <p style="font-size:13px; color:{COLORS['accent']}; margin:0; font-weight:500;">
+        <i class="ti ti-info-circle"></i> {text}</p>
+    </div>
+    """
+
+def success_message(text: str) -> str:
+    """Returns an HTML string for a small success checkmark message."""
+    return f"""
+    <p style="font-size:12px; color:{COLORS['accent_dark']};">
+        <i class="ti ti-check" style="font-size:13px;"></i> {text}
+    </p>
+    """
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # COMPONENT BUILDERS — each returns an HTML string
@@ -208,11 +232,12 @@ def status_badge(level: str) -> str:
     """
     level = level.lower()
     config = {
-        "low"    : (COLORS["low_bg"],    COLORS["low_text"],    "rgba(61,232,196,0.35)",  "Low"),
-        "medium" : (COLORS["medium_bg"], COLORS["medium_text"], "rgba(239,159,39,0.3)",   "Medium"),
-        "high"   : (COLORS["high_bg"],   COLORS["high_text"],   COLORS["high_glow"],      "High"),
+        "low"    : (COLORS["low_bg"],    COLORS["low_text"],    "rgba(61,232,196,0.35)",  "Low Risk"),
+        "medium" : (COLORS["medium_bg"], COLORS["medium_text"], "rgba(239,159,39,0.3)",   "Moderate Risk"),
+        "high"   : (COLORS["high_bg"],   COLORS["high_text"],   COLORS["high_glow"],      "High Risk"),
+        "info"   : (COLORS["info_bg"],   COLORS["info_text"],   COLORS["info_glow"],      "Informational"),
     }
-    bg, color, glow, label = config.get(level, config["medium"])
+    bg, color, glow, label = config.get(level, config["info"])
     return f"""
     <span style="background:{bg}; color:{color}; border:1px solid {glow}; border-radius:20px; padding:5px 14px;
                   font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;

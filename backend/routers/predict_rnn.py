@@ -1,9 +1,12 @@
+import logging
 from fastapi import APIRouter, HTTPException
 
 from core.preprocessing import parse_signal_payload, validate_signal_187
 from schemas.models import RNNRequest
 from schemas.models import SignalTextRequest
 from core.inference import predict_rnn
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/predict",
@@ -30,9 +33,10 @@ def rnn_predict(request: RNNRequest):
         raise
 
     except Exception as e:
+        logger.error(f"RNN prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="An internal error occurred during RNN prediction."
         )
 
 
@@ -53,7 +57,8 @@ def rnn_predict_from_text(request: SignalTextRequest):
         )
 
     except Exception as e:
+        logger.error(f"RNN text prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="An internal error occurred during RNN text prediction."
         )
