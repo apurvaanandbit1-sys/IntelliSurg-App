@@ -21,7 +21,8 @@ import requests
 import streamlit as st
 import plotly.graph_objects as go
 
-from demo_data import DEMO_PATIENTS, DEMO_ECGS
+from demo_data import DEMO_PATIENTS
+from ecg_demo_data import get_demo_ecg_signal, ECG_SAMPLES
 
 from theme import (
     inject_css,
@@ -568,7 +569,7 @@ with tab_rnn:
     with col_ecg1:
         selected_ecg_demo = st.selectbox(
             "Load Demo Telemetry Signal",
-            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            options=["Manual Entry"] + list(ECG_SAMPLES.keys()),
             key="rnn_demo_select"
         )
 
@@ -579,9 +580,20 @@ with tab_rnn:
             key="rnn_file",
         )
 
-    current_signal_text = DEFAULT_SIGNAL
-    if selected_ecg_demo != "Manual Entry":
-        current_signal_text = DEMO_ECGS[selected_ecg_demo]
+    # Initialize or update session state for random demo signals
+    if "rnn_last_demo_selection" not in st.session_state:
+        st.session_state["rnn_last_demo_selection"] = "Manual Entry"
+    if "rnn_current_signal_text" not in st.session_state:
+        st.session_state["rnn_current_signal_text"] = DEFAULT_SIGNAL
+
+    if selected_ecg_demo != st.session_state["rnn_last_demo_selection"]:
+        st.session_state["rnn_last_demo_selection"] = selected_ecg_demo
+        if selected_ecg_demo != "Manual Entry":
+            st.session_state["rnn_current_signal_text"] = get_demo_ecg_signal(selected_ecg_demo)
+        else:
+            st.session_state["rnn_current_signal_text"] = DEFAULT_SIGNAL
+
+    current_signal_text = st.session_state["rnn_current_signal_text"]
 
     if signal_file is not None:
         raw_text = signal_file.getvalue().decode("utf-8")
@@ -673,10 +685,24 @@ with tab_fusion:
     with col_f1:
         fusion_demo_ecg = st.selectbox(
             "Load Demo Telemetry Signal",
-            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            options=["Manual Entry"] + list(ECG_SAMPLES.keys()),
             key="fusion_demo_ecg"
         )
-        fusion_sig_val = DEMO_ECGS.get(fusion_demo_ecg, DEFAULT_SIGNAL)
+
+        # Initialize or update session state for random demo signals in Fusion
+        if "fusion_last_demo_selection" not in st.session_state:
+            st.session_state["fusion_last_demo_selection"] = "Manual Entry"
+        if "fusion_current_signal_text" not in st.session_state:
+            st.session_state["fusion_current_signal_text"] = DEFAULT_SIGNAL
+
+        if fusion_demo_ecg != st.session_state["fusion_last_demo_selection"]:
+            st.session_state["fusion_last_demo_selection"] = fusion_demo_ecg
+            if fusion_demo_ecg != "Manual Entry":
+                st.session_state["fusion_current_signal_text"] = get_demo_ecg_signal(fusion_demo_ecg)
+            else:
+                st.session_state["fusion_current_signal_text"] = DEFAULT_SIGNAL
+
+        fusion_sig_val = st.session_state["fusion_current_signal_text"]
         fusion_signal = st.text_area("Telemetry Data (187 points)", value=fusion_sig_val, height=120, key="fusion_signal")
 
     with col_f2:
