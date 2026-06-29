@@ -6,13 +6,29 @@
 
 *A multi-model healthcare AI prototype integrating ANN, RNN, CNN and Fusion AI into a unified clinical dashboard.*
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge\&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge\&logo=fastapi)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge\&logo=streamlit)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge\&logo=tensorflow)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Streamlit-success?style=for-the-badge)](https://intellisurg-ai.streamlit.app/)
+
+[![Backend API](https://img.shields.io/badge/⚡_Backend-Render-blue?style=for-the-badge)](https://apurv-intellisurg-api.onrender.com)
+
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow)
 ![GitHub](https://img.shields.io/github/stars/apurvaanandbit1-sys/IntelliSurg-App?style=for-the-badge)
 
 </div>
+
+---
+
+## 🌐 Live Deployment
+
+### 🚀 Frontend (Streamlit)
+
+https://intellisurg-ai.streamlit.app/
+
+### ⚡ Backend API (Render)
+
+https://apurv-intellisurg-api.onrender.com
 
 ---
 
@@ -25,6 +41,19 @@ The system combines structured clinical data, ECG signals and wound images into 
 This project was developed as an educational demonstration of applied AI in healthcare.
 
 ---
+# 🚀 Highlights
+
+- 🧠 Multimodal AI system integrating ANN, CNN, RNN and Fusion AI
+- ❤️ Real ECG5000 dataset integration for ECG beat classification
+- 🏥 Professional clinical dashboard built with Streamlit
+- ⚡ FastAPI backend with REST APIs and Pydantic validation
+- 📊 Interactive ECG waveform visualization and confidence analysis
+- 🩹 AI-powered wound infection detection
+- 📈 Comprehensive multimodal patient assessment report
+- ☁️ Deployed using Streamlit Community Cloud and Render
+
+---
+
 
 # ✨ Features
 
@@ -147,6 +176,15 @@ Combines outputs from all models to generate
 * Python (3.11+)
 
 ---
+# 📊 Datasets
+
+The project integrates multiple datasets to demonstrate a multimodal clinical AI workflow.
+
+| Model | Dataset |
+|--------|---------|
+| ANN | Post-operative clinical tabular dataset |
+| RNN | ECG5000 dataset |
+| CNN | Surgical wound image dataset |
 
 # 📂 Project Structure
 
@@ -177,7 +215,11 @@ IntelliSurg-App
 ```
 
 ---
+# 📚 Documentation
 
+A complete engineering handbook describing the project architecture, machine learning pipeline, backend APIs, frontend design, deployment workflow, and implementation details is available at:
+
+docs/IntelliSurg_Engineering_Handbook.md
 # 🚀 Getting Started
 
 Clone the repository
