@@ -21,7 +21,8 @@ import requests
 import streamlit as st
 import plotly.graph_objects as go
 
-from demo_data import DEMO_PATIENTS, DEMO_ECGS
+from demo_data import DEMO_PATIENTS
+from ecg_demo_data import get_demo_ecg_signal, ECG_SAMPLES
 
 from theme import (
     inject_css,
@@ -568,7 +569,7 @@ with tab_rnn:
     with col_ecg1:
         selected_ecg_demo = st.selectbox(
             "Load Demo Telemetry Signal",
-            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            options=["Manual Entry"] + list(ECG_SAMPLES.keys()),
             key="rnn_demo_select"
         )
 
@@ -579,27 +580,41 @@ with tab_rnn:
             key="rnn_file",
         )
 
-    current_signal_text = DEFAULT_SIGNAL
-    if selected_ecg_demo != "Manual Entry":
-        current_signal_text = DEMO_ECGS[selected_ecg_demo]
+    # Initialize session state for the text area and tracking variables
+    if "rnn_signal" not in st.session_state:
+        st.session_state["rnn_signal"] = DEFAULT_SIGNAL
+    if "rnn_last_demo_selection" not in st.session_state:
+        st.session_state["rnn_last_demo_selection"] = "Manual Entry"
+    if "rnn_last_uploaded_file_id" not in st.session_state:
+        st.session_state["rnn_last_uploaded_file_id"] = None
 
+    # Handle dropdown change
+    if selected_ecg_demo != st.session_state["rnn_last_demo_selection"]:
+        st.session_state["rnn_last_demo_selection"] = selected_ecg_demo
+        if selected_ecg_demo != "Manual Entry":
+            st.session_state["rnn_signal"] = get_demo_ecg_signal(selected_ecg_demo)
+        else:
+            st.session_state["rnn_signal"] = DEFAULT_SIGNAL
+
+    # Handle file upload change
     if signal_file is not None:
-        raw_text = signal_file.getvalue().decode("utf-8")
-        # Preprocessing: Extract numbers, pad/truncate to 187
-        raw_values = [x.strip() for x in raw_text.replace("\n", ",").split(",") if x.strip()]
-        if len(raw_values) > 187:
-            raw_values = raw_values[:187]
-        elif len(raw_values) < 187:
-            raw_values = raw_values + ["0.0"] * (187 - len(raw_values))
-        current_signal_text = ",".join(raw_values)
-        st.markdown(
-            success_message(f"Automatically processed uploaded file to {len(raw_values)} samples."),
-            unsafe_allow_html=True,
-        )
+        if signal_file.file_id != st.session_state["rnn_last_uploaded_file_id"]:
+            st.session_state["rnn_last_uploaded_file_id"] = signal_file.file_id
+            raw_text = signal_file.getvalue().decode("utf-8")
+            # Preprocessing: Extract numbers, pad/truncate to 187
+            raw_values = [x.strip() for x in raw_text.replace("\n", ",").split(",") if x.strip()]
+            if len(raw_values) > 187:
+                raw_values = raw_values[:187]
+            elif len(raw_values) < 187:
+                raw_values = raw_values + ["0.0"] * (187 - len(raw_values))
+            st.session_state["rnn_signal"] = ",".join(raw_values)
+            st.markdown(
+                success_message(f"Automatically processed uploaded file to {len(raw_values)} samples."),
+                unsafe_allow_html=True,
+            )
 
     signal_text = st.text_area(
         "Telemetry Data (187 points)",
-        value=current_signal_text,
         height=150,
         key="rnn_signal",
     )
@@ -673,11 +688,24 @@ with tab_fusion:
     with col_f1:
         fusion_demo_ecg = st.selectbox(
             "Load Demo Telemetry Signal",
-            options=["Manual Entry"] + list(DEMO_ECGS.keys()),
+            options=["Manual Entry"] + list(ECG_SAMPLES.keys()),
             key="fusion_demo_ecg"
         )
-        fusion_sig_val = DEMO_ECGS.get(fusion_demo_ecg, DEFAULT_SIGNAL)
-        fusion_signal = st.text_area("Telemetry Data (187 points)", value=fusion_sig_val, height=120, key="fusion_signal")
+
+        # Initialize session state for random demo signals in Fusion
+        if "fusion_signal" not in st.session_state:
+            st.session_state["fusion_signal"] = DEFAULT_SIGNAL
+        if "fusion_last_demo_selection" not in st.session_state:
+            st.session_state["fusion_last_demo_selection"] = "Manual Entry"
+
+        if fusion_demo_ecg != st.session_state["fusion_last_demo_selection"]:
+            st.session_state["fusion_last_demo_selection"] = fusion_demo_ecg
+            if fusion_demo_ecg != "Manual Entry":
+                st.session_state["fusion_signal"] = get_demo_ecg_signal(fusion_demo_ecg)
+            else:
+                st.session_state["fusion_signal"] = DEFAULT_SIGNAL
+
+        fusion_signal = st.text_area("Telemetry Data (187 points)", height=120, key="fusion_signal")
 
     with col_f2:
         fusion_image = st.file_uploader(
